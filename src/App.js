@@ -556,7 +556,21 @@ function App() {
   };
 
   const handlePurchaseStart = async (addressOverride) => {
-    const effectiveWalletAddress = addressOverride || walletAddress;
+    const normalizeWalletAddress = (value) => String(value || '').trim();
+    let effectiveWalletAddress = normalizeWalletAddress(addressOverride || walletAddress);
+
+    if ((!effectiveWalletAddress || !/^0x[a-fA-F0-9]{40}$/.test(effectiveWalletAddress)) && window.ethereum) {
+      try {
+        const fallbackAccounts = await window.ethereum.request({ method: 'eth_accounts' });
+        const fallbackAddress = normalizeWalletAddress(fallbackAccounts?.[0]);
+        if (/^0x[a-fA-F0-9]{40}$/.test(fallbackAddress)) {
+          effectiveWalletAddress = fallbackAddress;
+          setWalletAddress(fallbackAddress);
+        }
+      } catch (_) {
+        // ignore fallback wallet lookup errors
+      }
+    }
 
     if (!effectiveWalletAddress || !/^0x[a-fA-F0-9]{40}$/.test(effectiveWalletAddress)) {
       throw new Error('Connectez un wallet Ethereum valide avant d\'acheter.');
@@ -637,7 +651,7 @@ function App() {
 
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const selectedAddress = accounts?.[0];
+      const selectedAddress = String(accounts?.[0] || '').trim();
 
       if (!selectedAddress || !/^0x[a-fA-F0-9]{40}$/.test(selectedAddress)) {
         throw new Error('Adresse wallet invalide.');
