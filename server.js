@@ -103,6 +103,7 @@ const SBT_ABI = [
 const walletChallenges = new Map();
 
 const isValidEthAddress = (address) => /^0x[a-fA-F0-9]{40}$/.test(address || '');
+const normalizeEthAddress = (address) => String(address || '').trim();
 
 const parseTokenIdFromReceipt = (receipt) => {
   const transferTopic = ethers.id('Transfer(address,address,uint256)');
@@ -404,7 +405,15 @@ app.post(['/create-checkout-session', '/api/create-checkout-session', '/.netlify
   try {
     const stripe = getStripeClient();
     const { userEmail, userId, userAddress } = req.body;
+    const normalizedUserAddress = normalizeEthAddress(userAddress);
     const frontendBaseUrl = resolveFrontendBaseUrl(req);
+
+    if (!isValidEthAddress(normalizedUserAddress)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Adresse wallet invalide. Reconnectez votre wallet puis réessayez.',
+      });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -427,7 +436,7 @@ app.post(['/create-checkout-session', '/api/create-checkout-session', '/.netlify
       customer_email: userEmail,
       metadata: {
         userId,
-        userAddress,
+        userAddress: normalizedUserAddress,
         userEmail,
       },
     });
@@ -443,6 +452,9 @@ app.post(['/verify-payment', '/api/verify-payment', '/.netlify/functions/api/ver
   try {
     const stripe = getStripeClient();
     const sessionId = resolveCheckoutSessionId(req);
+    const providedUserAddress = normalizeEthAddress(
+      req?.body?.userAddress || req?.body?.walletAddress || req?.query?.userAddress || req?.query?.walletAddress
+    );
 
     if (!sessionId) {
       return res.status(400).json({
@@ -452,6 +464,30 @@ app.post(['/verify-payment', '/api/verify-payment', '/.netlify/functions/api/ver
     }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const sessionUserAddress = normalizeEthAddress(session.metadata?.userAddress);
+    const resolvedUserAddress = isValidEthAddress(sessionUserAddress)
+      ? sessionUserAddress
+      : (isValidEthAddress(providedUserAddress) ? providedUserAddress : '');
+
+    if (!resolvedUserAddress) {
+      return res.status(400).json({
+        success: false,
+        error: 'Adresse wallet invalide pour le mint SBT. Reconnectez votre wallet puis relancez la vérification.',
+      });
+    }
+
+    if (resolvedUserAddress !== sessionUserAddress) {
+      await stripe.checkout.sessions.update(sessionId, {
+        metadata: {
+          ...(session.metadata || {}),
+          userAddress: resolvedUserAddress,
+        },
+      });
+      session.metadata = {
+        ...(session.metadata || {}),
+        userAddress: resolvedUserAddress,
+      };
+    }
 
     if (session.payment_status === 'paid') {
       const alreadyMinted =
@@ -506,7 +542,7 @@ app.post(['/verify-payment', '/api/verify-payment', '/.netlify/functions/api/ver
         });
       }
 
-      const userAddress = session.metadata?.userAddress;
+      const userAddress = resolvedUserAddress;
       const minted = await mintSoulboundTicket({ userAddress });
       const ticketQrData = createSignedTicketQrData({
         ticketId: sessionId,

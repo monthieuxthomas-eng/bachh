@@ -78,11 +78,14 @@ const fetchPaymentApiWithFallback = async (path, options, settings = {}) => {
   throw new Error(`Aucun endpoint paiement joignable (${attemptedUrl || 'non résolu'})`);
 };
 
-const buildVerifyPaymentPayload = (sessionId) => {
+const buildVerifyPaymentPayload = (sessionId, userAddress) => {
   const normalized = String(sessionId || '').trim();
+  const normalizedAddress = String(userAddress || '').trim();
   return {
     sessionId: normalized,
     session_id: normalized,
+    userAddress: normalizedAddress,
+    walletAddress: normalizedAddress,
   };
 };
 
@@ -328,10 +331,11 @@ function App() {
 
         for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
           try {
+            const verifyPayloadAddress = walletAddress || currentTicketRef.current?.userAddress || null;
             const { response: res } = await fetchPaymentApiWithFallback('/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(buildVerifyPaymentPayload(sessionId)),
+              body: JSON.stringify(buildVerifyPaymentPayload(sessionId, verifyPayloadAddress)),
             }, { fallbackOnHttpError: true });
 
             const data = await res.json().catch(() => ({}));
@@ -666,7 +670,7 @@ function App() {
         const { response: res } = await fetchPaymentApiWithFallback('/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(buildVerifyPaymentPayload(sessionId)),
+          body: JSON.stringify(buildVerifyPaymentPayload(sessionId, walletAddress || currentTicket?.userAddress || null)),
         }, { fallbackOnHttpError: true });
 
         const data = await res.json().catch(() => ({}));
