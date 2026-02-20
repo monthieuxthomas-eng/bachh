@@ -95,12 +95,13 @@ const ADMIN_EMAILS = String(process.env.REACT_APP_ADMIN_EMAILS || '')
   .map((item) => item.trim().toLowerCase())
   .filter(Boolean);
 
-const savePendingCheckoutSession = (sessionId) => {
+const savePendingCheckoutSession = (sessionId, walletAddress) => {
   if (!sessionId) return;
 
   try {
     const payload = {
       sessionId,
+      walletAddress: String(walletAddress || '').trim() || null,
       createdAt: Date.now(),
     };
     localStorage.setItem(PENDING_CHECKOUT_STORAGE_KEY, JSON.stringify(payload));
@@ -109,7 +110,7 @@ const savePendingCheckoutSession = (sessionId) => {
   }
 };
 
-const readPendingCheckoutSession = () => {
+const readPendingCheckoutPayload = () => {
   try {
     const raw = localStorage.getItem(PENDING_CHECKOUT_STORAGE_KEY);
     if (!raw) return null;
@@ -119,11 +120,16 @@ const readPendingCheckoutSession = () => {
       return null;
     }
 
-    return String(parsed.sessionId);
+    return {
+      sessionId: String(parsed.sessionId),
+      walletAddress: String(parsed.walletAddress || '').trim() || null,
+    };
   } catch (_) {
     return null;
   }
 };
+
+const readPendingCheckoutSession = () => readPendingCheckoutPayload()?.sessionId || null;
 
 const clearPendingCheckoutSession = () => {
   try {
@@ -305,7 +311,8 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get('payment') || params.get('checkout');
-    const sessionId = params.get('session_id') || readPendingCheckoutSession();
+    const pendingCheckout = readPendingCheckoutPayload();
+    const sessionId = params.get('session_id') || pendingCheckout?.sessionId || null;
 
     if (checkoutHandled) {
       return;
@@ -331,7 +338,7 @@ function App() {
 
         for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
           try {
-            const verifyPayloadAddress = walletAddress || currentTicketRef.current?.userAddress || null;
+            const verifyPayloadAddress = walletAddress || currentTicketRef.current?.userAddress || pendingCheckout?.walletAddress || null;
             const { response: res } = await fetchPaymentApiWithFallback('/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -610,7 +617,7 @@ function App() {
       const data = await response.json();
 
       if (data.url) {
-        savePendingCheckoutSession(data.sessionId);
+        savePendingCheckoutSession(data.sessionId, effectiveWalletAddress);
         window.location.href = data.url;
         return;
       }
