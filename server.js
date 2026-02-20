@@ -49,6 +49,23 @@ const resolveFrontendBaseUrl = (req) => {
 
   return configured || 'http://localhost:3000';
 };
+const resolveCheckoutSessionId = (req) => {
+  const candidates = [
+    req?.body?.sessionId,
+    req?.body?.session_id,
+    req?.query?.sessionId,
+    req?.query?.session_id,
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = String(candidate || '').trim();
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return '';
+};
 const normalizePrivateKey = (value) => {
   if (!value) return '';
   return value.startsWith('0x') ? value : `0x${value}`;
@@ -410,7 +427,14 @@ app.post(['/create-checkout-session', '/api/create-checkout-session', '/.netlify
 app.post(['/verify-payment', '/api/verify-payment', '/.netlify/functions/api/verify-payment'], async (req, res) => {
   try {
     const stripe = getStripeClient();
-    const { sessionId } = req.body;
+    const sessionId = resolveCheckoutSessionId(req);
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'sessionId manquant. Attendu: body.sessionId ou query.session_id.',
+      });
+    }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
