@@ -1,0 +1,56 @@
+{
+  "name": "baccha-festival",
+  "version": "1.0.0",
+  "description": "Site web pour les festivaliers du Baccha Festival",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.6.2",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.15.0",
+    "express": "^5.2.1",
+    "firebase": "^10.7.0",
+    "lucide-react": "^0.292.0",
+    "qrcode.react": "^3.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "serverless-http": "^3.2.0",
+    "stripe": "^20.3.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.9",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.16",
+    "hardhat": "^2.26.3",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "contracts:compile": "hardhat compile",
+    "contracts:deploy:sbt": "hardhat run scripts/deploy-sbt.js --network target"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

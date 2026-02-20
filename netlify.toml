@@ -1,0 +1,44 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/create-checkout-session"
+  to = "/.netlify/functions/api/create-checkout-session"
+  status = 200
+
+[[redirects]]
+  from = "/verify-payment"
+  to = "/.netlify/functions/api/verify-payment"
+  status = 200
+
+[[redirects]]
+  from = "/issue-ticket-qr"
+  to = "/.netlify/functions/api/issue-ticket-qr"
+  status = 200
+
+[[redirects]]
+  from = "/verify-ticket"
+  to = "/.netlify/functions/api/verify-ticket"
+  status = 200
+
+[[redirects]]
+  from = "/wallet-challenge/request"
+  to = "/.netlify/functions/api/wallet-challenge/request"
+  status = 200
+
+[[redirects]]
+  from = "/wallet-challenge/verify"
+  to = "/.netlify/functions/api/wallet-challenge/verify"
+  status = 200
+
+[[redirects]]
+  from = "/test-mint-sbt"
+  to = "/.netlify/functions/api/test-mint-sbt"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

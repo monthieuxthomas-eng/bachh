@@ -1,0 +1,14 @@
+{
+  "name": "functions",
+  "description": "Firebase Cloud Functions for Baccha Festival",
+  "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^4.6.0",
+    "stripe": "^14.21.0"
+  }
+}

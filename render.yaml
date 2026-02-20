@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: baccha-festival-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: REACT_APP_STRIPE_SECRET_KEY
+        sync: false
+      - key: FRONTEND_BASE_URL
+        sync: false
+      - key: SBT_RPC_URL
+        sync: false
+      - key: SBT_MINTER_PRIVATE_KEY
+        sync: false
+      - key: SBT_CONTRACT_ADDRESS
+        sync: false
+      - key: SBT_CHAIN_ID
+        sync: false
+      - key: SBT_EXPLORER_BASE_URL
+        sync: false
+      - key: SBT_DEFAULT_TOKEN_URI
+        sync: false
+      - key: TICKET_QR_SIGNING_SECRET
+        sync: false
+      - key: WALLET_CHALLENGE_TTL_MS
+        value: "120000"
+      - key: TEST_MINT_API_KEY
+        sync: false

@@ -1,0 +1,18 @@
+✅ Stripe server running on http://localhost:5000
+📝 Endpoints:
+  POST http://localhost:5000/create-checkout-session
+  POST http://localhost:5000/verify-payment
+  POST http://localhost:5000/issue-ticket-qr
+  POST http://localhost:5000/verify-ticket
+  POST http://localhost:5000/wallet-challenge/request
+  POST http://localhost:5000/wallet-challenge/verify
+  POST http://localhost:5000/test-mint-sbt
+✅ Stripe server running on http://localhost:5000
+📝 Endpoints:
+  POST http://localhost:5000/create-checkout-session
+  POST http://localhost:5000/verify-payment
+  POST http://localhost:5000/issue-ticket-qr
+  POST http://localhost:5000/verify-ticket
+  POST http://localhost:5000/wallet-challenge/request
+  POST http://localhost:5000/wallet-challenge/verify
+  POST http://localhost:5000/test-mint-sbt
