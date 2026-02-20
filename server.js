@@ -50,11 +50,26 @@ const resolveFrontendBaseUrl = (req) => {
   return configured || 'http://localhost:3000';
 };
 const resolveCheckoutSessionId = (req) => {
+  const refererHeader = req?.headers?.referer || req?.headers?.referrer || '';
+  let refererSessionId = '';
+
+  if (refererHeader) {
+    try {
+      const refererUrl = new URL(refererHeader);
+      refererSessionId = String(
+        refererUrl.searchParams.get('session_id') || refererUrl.searchParams.get('sessionId') || ''
+      ).trim();
+    } catch (_) {
+      refererSessionId = '';
+    }
+  }
+
   const candidates = [
     req?.body?.sessionId,
     req?.body?.session_id,
     req?.query?.sessionId,
     req?.query?.session_id,
+    refererSessionId,
   ];
 
   for (const candidate of candidates) {

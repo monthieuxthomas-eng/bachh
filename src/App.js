@@ -78,6 +78,14 @@ const fetchPaymentApiWithFallback = async (path, options, settings = {}) => {
   throw new Error(`Aucun endpoint paiement joignable (${attemptedUrl || 'non résolu'})`);
 };
 
+const buildVerifyPaymentPayload = (sessionId) => {
+  const normalized = String(sessionId || '').trim();
+  return {
+    sessionId: normalized,
+    session_id: normalized,
+  };
+};
+
 const PENDING_CHECKOUT_STORAGE_KEY = 'baccha_pending_checkout';
 const ADMIN_EMAILS = String(process.env.REACT_APP_ADMIN_EMAILS || '')
   .split(',')
@@ -323,7 +331,7 @@ function App() {
             const { response: res } = await fetchPaymentApiWithFallback('/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sessionId }),
+              body: JSON.stringify(buildVerifyPaymentPayload(sessionId)),
             }, { fallbackOnHttpError: true });
 
             const data = await res.json().catch(() => ({}));
@@ -658,7 +666,7 @@ function App() {
         const { response: res } = await fetchPaymentApiWithFallback('/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
+          body: JSON.stringify(buildVerifyPaymentPayload(sessionId)),
         }, { fallbackOnHttpError: true });
 
         const data = await res.json().catch(() => ({}));
