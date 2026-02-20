@@ -43,7 +43,7 @@ const isNetworkFetchError = (error) => (
   /Failed to fetch|NetworkError|Load failed/i.test(error?.message || '')
 );
 
-const shouldRetryOnHttpStatus = (status) => [404, 408, 425, 429, 500, 502, 503, 504].includes(Number(status));
+const shouldRetryOnHttpStatus = (status) => [404, 408, 425, 429, 502, 503, 504].includes(Number(status));
 
 const fetchPaymentApiWithFallback = async (path, options, settings = {}) => {
   const fallbackOnHttpError = Boolean(settings?.fallbackOnHttpError);
