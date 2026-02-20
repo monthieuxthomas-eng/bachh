@@ -33,6 +33,22 @@ const TICKET_QR_SIGNING_SECRET = process.env.TICKET_QR_SIGNING_SECRET;
 const WALLET_CHALLENGE_TTL_MS = Number(process.env.WALLET_CHALLENGE_TTL_MS || 120000);
 const TEST_MINT_API_KEY = process.env.TEST_MINT_API_KEY;
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
+const sanitizeBaseUrl = (value) => String(value || '').trim().replace(/\/+$/, '');
+const isLocalhostUrl = (value) => /^(https?:\/\/)?(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/.*)?$/i.test(String(value || '').trim());
+const resolveFrontendBaseUrl = (req) => {
+  const configured = sanitizeBaseUrl(FRONTEND_BASE_URL);
+  const originHeader = sanitizeBaseUrl(req?.headers?.origin);
+
+  if (configured && !isLocalhostUrl(configured)) {
+    return configured;
+  }
+
+  if (originHeader) {
+    return originHeader;
+  }
+
+  return configured || 'http://localhost:3000';
+};
 const normalizePrivateKey = (value) => {
   if (!value) return '';
   return value.startsWith('0x') ? value : `0x${value}`;
@@ -352,10 +368,11 @@ const mintSoulboundTicket = async ({ userAddress }) => {
   };
 };
 
-app.post(['/create-checkout-session', '/api/create-checkout-session'], async (req, res) => {
+app.post(['/create-checkout-session', '/api/create-checkout-session', '/.netlify/functions/api/create-checkout-session'], async (req, res) => {
   try {
     const stripe = getStripeClient();
     const { userEmail, userId, userAddress } = req.body;
+    const frontendBaseUrl = resolveFrontendBaseUrl(req);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -373,8 +390,8 @@ app.post(['/create-checkout-session', '/api/create-checkout-session'], async (re
         },
       ],
       mode: 'payment',
-      success_url: `${FRONTEND_BASE_URL}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${FRONTEND_BASE_URL}/?payment=cancel`,
+      success_url: `${frontendBaseUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendBaseUrl}/?payment=cancel`,
       customer_email: userEmail,
       metadata: {
         userId,
@@ -390,7 +407,7 @@ app.post(['/create-checkout-session', '/api/create-checkout-session'], async (re
   }
 });
 
-app.post(['/verify-payment', '/api/verify-payment'], async (req, res) => {
+app.post(['/verify-payment', '/api/verify-payment', '/.netlify/functions/api/verify-payment'], async (req, res) => {
   try {
     const stripe = getStripeClient();
     const { sessionId } = req.body;
