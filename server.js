@@ -104,6 +104,34 @@ const walletChallenges = new Map();
 
 const isValidEthAddress = (address) => /^0x[a-fA-F0-9]{40}$/.test(address || '');
 const normalizeEthAddress = (address) => String(address || '').trim();
+const resolveIncomingWalletAddress = (req) => {
+  const candidates = [
+    req?.body?.userAddress,
+    req?.body?.walletAddress,
+    req?.body?.address,
+    req?.query?.userAddress,
+    req?.query?.walletAddress,
+    req?.query?.address,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const normalized = normalizeEthAddress(candidate);
+      if (normalized) {
+        return normalized;
+      }
+    }
+
+    if (candidate && typeof candidate === 'object' && typeof candidate.address === 'string') {
+      const normalized = normalizeEthAddress(candidate.address);
+      if (normalized) {
+        return normalized;
+      }
+    }
+  }
+
+  return '';
+};
 
 const parseTokenIdFromReceipt = (receipt) => {
   const transferTopic = ethers.id('Transfer(address,address,uint256)');
@@ -405,15 +433,9 @@ app.post(['/create-checkout-session', '/api/create-checkout-session', '/.netlify
   try {
     const stripe = getStripeClient();
     const { userEmail, userId, userAddress } = req.body;
-    const normalizedUserAddress = normalizeEthAddress(userAddress);
+    const normalizedUserAddress = normalizeEthAddress(userAddress || resolveIncomingWalletAddress(req));
     const frontendBaseUrl = resolveFrontendBaseUrl(req);
-
-    if (!isValidEthAddress(normalizedUserAddress)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Adresse wallet invalide. Reconnectez votre wallet puis réessayez.',
-      });
-    }
+    const safeWalletAddress = isValidEthAddress(normalizedUserAddress) ? normalizedUserAddress : '';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -436,7 +458,7 @@ app.post(['/create-checkout-session', '/api/create-checkout-session', '/.netlify
       customer_email: userEmail,
       metadata: {
         userId,
-        userAddress: normalizedUserAddress,
+        userAddress: safeWalletAddress,
         userEmail,
       },
     });
