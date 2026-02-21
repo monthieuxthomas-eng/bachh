@@ -1,3 +1,6 @@
 const app = require('../server');
 
-module.exports = (req, res) => app(req, res);
+module.exports = (req, res) => {
+	req.url = '/verify-payment';
+	return app(req, res);
+};
