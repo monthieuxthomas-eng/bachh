@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShoppingCart, Loader, ShieldCheck, Lock, Wallet } from 'lucide-react';
 
 const BuyTicketComponent = ({
@@ -10,7 +10,16 @@ const BuyTicketComponent = ({
   loading,
 }) => {
   const [error, setError] = useState(null);
+  const [manualAddress, setManualAddress] = useState('');
   const walletReady = /^0x[a-fA-F0-9]{40}$/.test(walletAddress || '');
+  const manualAddressReady = /^0x[a-fA-F0-9]{40}$/.test((manualAddress || '').trim());
+  const hasInjectedWallet = typeof window !== 'undefined' && Boolean(window.ethereum);
+
+  useEffect(() => {
+    if (walletReady) {
+      setManualAddress(walletAddress);
+    }
+  }, [walletAddress, walletReady]);
 
   const handleBuyTicket = async () => {
     setError(null);
@@ -18,7 +27,13 @@ const BuyTicketComponent = ({
       let effectiveAddress = walletAddress;
 
       if (!walletReady) {
-        effectiveAddress = await onConnectWallet();
+        if (hasInjectedWallet) {
+          effectiveAddress = await onConnectWallet();
+        } else if (manualAddressReady) {
+          effectiveAddress = manualAddress.trim();
+        } else {
+          throw new Error('Entrez une adresse wallet EVM valide (0x...) pour continuer.');
+        }
       }
 
       await onPurchaseStart(effectiveAddress);
@@ -79,18 +94,36 @@ const BuyTicketComponent = ({
           </div>
         )}
 
-        <button
-          onClick={onConnectWallet}
-          disabled={walletLoading}
-          className="w-full mb-4 px-4 py-3 border-2 border-green-600 text-green-700 font-semibold rounded-full hover:bg-green-50 transition flex items-center justify-center gap-2"
-        >
-          <Wallet size={18} />
-          {walletLoading
-            ? 'Connexion wallet...'
-            : walletReady
-              ? 'Wallet connecté ✅'
-              : 'Connecter MetaMask / Wallet'}
-        </button>
+        {hasInjectedWallet ? (
+          <button
+            onClick={onConnectWallet}
+            disabled={walletLoading}
+            className="w-full mb-4 px-4 py-3 border-2 border-green-600 text-green-700 font-semibold rounded-full hover:bg-green-50 transition flex items-center justify-center gap-2"
+          >
+            <Wallet size={18} />
+            {walletLoading
+              ? 'Connexion wallet...'
+              : walletReady
+                ? 'Wallet connecté ✅'
+                : 'Connecter MetaMask / Wallet'}
+          </button>
+        ) : (
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Adresse wallet de réception du SBT
+            </label>
+            <input
+              type="text"
+              value={manualAddress}
+              onChange={(event) => setManualAddress(event.target.value)}
+              placeholder="0x..."
+              className="w-full px-4 py-3 border-2 border-green-600 text-green-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-300"
+            />
+            <p className="mt-2 text-xs text-gray-600">
+              MetaMask non détecté sur ce navigateur. Entrez une adresse EVM valide.
+            </p>
+          </div>
+        )}
 
         <button
           onClick={handleBuyTicket}
@@ -115,7 +148,9 @@ const BuyTicketComponent = ({
             <strong>Adresse de réception du SBT:</strong>{' '}
             {walletReady
               ? `${walletAddress.substring(0, 10)}...${walletAddress.slice(-8)}`
-              : 'Non connectée'}
+              : manualAddressReady
+                ? `${manualAddress.trim().substring(0, 10)}...${manualAddress.trim().slice(-8)}`
+                : 'Non connectée'}
           </p>
         </div>
       </div>
