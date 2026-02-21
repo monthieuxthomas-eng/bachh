@@ -24,8 +24,8 @@ app.use(express.json());
 
 const TICKET_PRICE = 100; // 1 EUR en centimes
 
-const SBT_RPC_URL = process.env.SBT_RPC_URL;
-const SBT_CONTRACT_ADDRESS = process.env.SBT_CONTRACT_ADDRESS;
+const SBT_RPC_URL = process.env.SBT_RPC_URL || process.env.REACT_APP_SBT_RPC_URL;
+const SBT_CONTRACT_ADDRESS = process.env.SBT_CONTRACT_ADDRESS || process.env.REACT_APP_SBT_CONTRACT_ADDRESS;
 const SBT_CHAIN_ID = process.env.SBT_CHAIN_ID || '1';
 const SBT_EXPLORER_BASE_URL = process.env.SBT_EXPLORER_BASE_URL || 'https://etherscan.io';
 const SBT_DEFAULT_TOKEN_URI = process.env.SBT_DEFAULT_TOKEN_URI || 'ipfs://baccha-festival-2026-ticket';
@@ -86,7 +86,9 @@ const normalizePrivateKey = (value) => {
   return value.startsWith('0x') ? value : `0x${value}`;
 };
 
-const SBT_MINTER_PRIVATE_KEY = normalizePrivateKey(process.env.SBT_MINTER_PRIVATE_KEY);
+const SBT_MINTER_PRIVATE_KEY = normalizePrivateKey(
+  process.env.SBT_MINTER_PRIVATE_KEY || process.env.REACT_APP_SBT_MINTER_PRIVATE_KEY
+);
 const SBT_VOUCHER_SIGNER_PRIVATE_KEY = normalizePrivateKey(
   process.env.SBT_VOUCHER_SIGNER_PRIVATE_KEY || process.env.SBT_MINTER_PRIVATE_KEY
 );
@@ -362,9 +364,14 @@ const validateTicketQrAndOnChain = async (qrData) => {
 };
 
 const mintSoulboundTicket = async ({ userAddress }) => {
-  if (!SBT_RPC_URL || !SBT_MINTER_PRIVATE_KEY || !SBT_CONTRACT_ADDRESS) {
+  const missing = [];
+  if (!SBT_RPC_URL) missing.push('SBT_RPC_URL');
+  if (!SBT_MINTER_PRIVATE_KEY) missing.push('SBT_MINTER_PRIVATE_KEY');
+  if (!SBT_CONTRACT_ADDRESS) missing.push('SBT_CONTRACT_ADDRESS');
+
+  if (missing.length > 0) {
     throw new Error(
-      'Configuration SBT manquante. Vérifiez SBT_RPC_URL, SBT_MINTER_PRIVATE_KEY et SBT_CONTRACT_ADDRESS.'
+      `Configuration SBT manquante: ${missing.join(', ')}.`
     );
   }
 
