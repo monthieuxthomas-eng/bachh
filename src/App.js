@@ -90,6 +90,8 @@ const buildVerifyPaymentPayload = (sessionId, userAddress) => {
   };
 };
 
+const isInvalidWalletForMintMessage = (message) => /adresse wallet invalide/i.test(String(message || ''));
+
 const PENDING_CHECKOUT_STORAGE_KEY = 'baccha_pending_checkout';
 const ADMIN_EMAILS = String(process.env.REACT_APP_ADMIN_EMAILS || '')
   .split(',')
@@ -447,6 +449,22 @@ function App() {
             }
 
             const backendMessage = data?.error || data?.message || 'Paiement non validé.';
+            if (isInvalidWalletForMintMessage(backendMessage) && window.ethereum) {
+              try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const recoveredAddress = String(accounts?.[0] || '').trim();
+                if (/^0x[a-fA-F0-9]{40}$/.test(recoveredAddress)) {
+                  setWalletAddress(recoveredAddress);
+                  if (attempt < maxRetries) {
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+                    continue;
+                  }
+                }
+              } catch (_) {
+                // ignore and fall back to backend message
+              }
+            }
+
             const canRetry = /payment not completed|not completed|en attente|pending/i.test(backendMessage);
 
             if (canRetry && attempt < maxRetries) {
@@ -697,6 +715,18 @@ function App() {
 
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data?.success) {
+          const backendMessage = data?.error || data?.message || '';
+          if (isInvalidWalletForMintMessage(backendMessage) && window.ethereum) {
+            try {
+              const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+              const recoveredAddress = String(accounts?.[0] || '').trim();
+              if (/^0x[a-fA-F0-9]{40}$/.test(recoveredAddress) && !cancelled) {
+                setWalletAddress(recoveredAddress);
+              }
+            } catch (_) {
+              // ignore wallet reconnection errors here
+            }
+          }
           return;
         }
 
