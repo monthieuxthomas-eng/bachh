@@ -27,6 +27,7 @@ const PAYMENT_API_BASE_CANDIDATES = (() => {
   const candidates = [API_BASE_URL];
 
   if (process.env.NODE_ENV !== 'development') {
+    candidates.push('/api');
     candidates.push('');
     candidates.push('/.netlify/functions/api');
   }
