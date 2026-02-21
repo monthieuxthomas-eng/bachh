@@ -1,6 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { ShoppingCart, Loader, ShieldCheck, Lock, Wallet } from 'lucide-react';
 
+const getInjectedEvmProvider = () => {
+  if (typeof window === 'undefined') return null;
+
+  const ethereum = window.ethereum;
+  const web3Provider = window.web3?.currentProvider;
+
+  if (ethereum?.providers && Array.isArray(ethereum.providers)) {
+    const metaMaskProvider = ethereum.providers.find((provider) => provider?.isMetaMask);
+    if (metaMaskProvider) return metaMaskProvider;
+
+    const firstValidProvider = ethereum.providers.find((provider) => provider?.request);
+    if (firstValidProvider) return firstValidProvider;
+  }
+
+  if (ethereum?.request) return ethereum;
+  if (web3Provider?.request) return web3Provider;
+
+  return null;
+};
+
 const BuyTicketComponent = ({
   user,
   walletAddress,
@@ -11,9 +31,22 @@ const BuyTicketComponent = ({
 }) => {
   const [error, setError] = useState(null);
   const [manualAddress, setManualAddress] = useState('');
+  const [hasInjectedWallet, setHasInjectedWallet] = useState(Boolean(getInjectedEvmProvider()));
   const walletReady = /^0x[a-fA-F0-9]{40}$/.test(walletAddress || '');
   const manualAddressReady = /^0x[a-fA-F0-9]{40}$/.test((manualAddress || '').trim());
-  const hasInjectedWallet = typeof window !== 'undefined' && Boolean(window.ethereum);
+
+  useEffect(() => {
+    const refreshProviderState = () => setHasInjectedWallet(Boolean(getInjectedEvmProvider()));
+
+    refreshProviderState();
+    const timeoutId = setTimeout(refreshProviderState, 1200);
+    const intervalId = setInterval(refreshProviderState, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     if (walletReady) {

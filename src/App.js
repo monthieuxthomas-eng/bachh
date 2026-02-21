@@ -90,6 +90,26 @@ const buildVerifyPaymentPayload = (sessionId, userAddress) => {
   };
 };
 
+const getInjectedEvmProvider = () => {
+  if (typeof window === 'undefined') return null;
+
+  const ethereum = window.ethereum;
+  const web3Provider = window.web3?.currentProvider;
+
+  if (ethereum?.providers && Array.isArray(ethereum.providers)) {
+    const metaMaskProvider = ethereum.providers.find((provider) => provider?.isMetaMask);
+    if (metaMaskProvider) return metaMaskProvider;
+
+    const firstValidProvider = ethereum.providers.find((provider) => provider?.request);
+    if (firstValidProvider) return firstValidProvider;
+  }
+
+  if (ethereum?.request) return ethereum;
+  if (web3Provider?.request) return web3Provider;
+
+  return null;
+};
+
 const isInvalidWalletForMintMessage = (message) => /adresse wallet invalide/i.test(String(message || ''));
 
 const PENDING_CHECKOUT_STORAGE_KEY = 'baccha_pending_checkout';
@@ -587,9 +607,11 @@ function App() {
     const normalizeWalletAddress = (value) => String(value || '').trim();
     let effectiveWalletAddress = normalizeWalletAddress(addressOverride || walletAddress);
 
-    if ((!effectiveWalletAddress || !/^0x[a-fA-F0-9]{40}$/.test(effectiveWalletAddress)) && window.ethereum) {
+    const injectedProvider = getInjectedEvmProvider();
+
+    if ((!effectiveWalletAddress || !/^0x[a-fA-F0-9]{40}$/.test(effectiveWalletAddress)) && injectedProvider) {
       try {
-        const fallbackAccounts = await window.ethereum.request({ method: 'eth_accounts' });
+        const fallbackAccounts = await injectedProvider.request({ method: 'eth_accounts' });
         const fallbackAddress = normalizeWalletAddress(fallbackAccounts?.[0]);
         if (/^0x[a-fA-F0-9]{40}$/.test(fallbackAddress)) {
           effectiveWalletAddress = fallbackAddress;
@@ -668,7 +690,9 @@ function App() {
   };
 
   const handleConnectWallet = async () => {
-    if (!window.ethereum) {
+    const injectedProvider = getInjectedEvmProvider();
+
+    if (!injectedProvider) {
       const message = 'MetaMask (ou wallet EVM compatible) est requis pour mint un vrai SBT.';
       setError(message);
       throw new Error(message);
@@ -678,7 +702,7 @@ function App() {
     setError('');
 
     try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await injectedProvider.request({ method: 'eth_requestAccounts' });
       const selectedAddress = String(accounts?.[0] || '').trim();
 
       if (!selectedAddress || !/^0x[a-fA-F0-9]{40}$/.test(selectedAddress)) {
