@@ -338,10 +338,11 @@ function App() {
       const verifyPayment = async () => {
         const maxRetries = 4;
         let lastError = null;
+        let runtimeWalletAddress = walletAddress || currentTicketRef.current?.userAddress || pendingCheckout?.walletAddress || null;
 
         for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
           try {
-            const verifyPayloadAddress = walletAddress || currentTicketRef.current?.userAddress || pendingCheckout?.walletAddress || null;
+            const verifyPayloadAddress = runtimeWalletAddress;
             const { response: res } = await fetchPaymentApiWithFallback('/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -454,6 +455,7 @@ function App() {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const recoveredAddress = String(accounts?.[0] || '').trim();
                 if (/^0x[a-fA-F0-9]{40}$/.test(recoveredAddress)) {
+                  runtimeWalletAddress = recoveredAddress;
                   setWalletAddress(recoveredAddress);
                   if (attempt < maxRetries) {
                     await new Promise((resolve) => setTimeout(resolve, 500));
