@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { auth, db, firebaseInitError } from './firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { arrayUnion, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { ShieldCheck, LogIn, UserPlus } from 'lucide-react';
 import BuyTicketComponent from './components/BuyTicketComponent';
 import WaitingComponent from './components/WaitingComponent';
 import TicketComponent from './components/TicketComponent';
@@ -770,8 +771,7 @@ function App() {
 
   if (appState === 'auth') {
     return (
-      <div className="min-h-screen gradient-gold-green flex items-center justify-center p-4">
-        <div className="corner-credit">merci Call X</div>
+      <div className="min-h-screen gradient-gold-green auth-party-bg flex items-center justify-center p-4">
         <div className="card-elegant max-w-md w-full relative">
           {loading && (
             <div className="absolute inset-0 bg-white/70 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -782,11 +782,13 @@ function App() {
             </div>
           )}
           <div className="text-center mb-8">
-            <div className="tropical-wave text-6xl mb-4">🎉</div>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 text-green-800 flex items-center justify-center">
+              <ShieldCheck size={30} />
+            </div>
             <h1 className="text-3xl font-bold text-green-900 mb-2">
               Baccha Festival 2026
             </h1>
-            <p className="text-gray-600">Obtenez votre ticket SBT en 1 clic</p>
+            <p className="text-gray-600">Accès sécurisé • Ticket SBT nominatif</p>
           </div>
 
           <form onSubmit={handleSignIn} className="space-y-4">
@@ -816,9 +818,9 @@ function App() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full"
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? 'Connexion...' : <><LogIn size={18} /> Se connecter</>}
             </button>
           </form>
 
@@ -829,9 +831,9 @@ function App() {
             <button
               onClick={handleSignUp}
               disabled={loading}
-              className="w-full px-4 py-2 border-2 border-yellow-500 text-yellow-600 font-semibold rounded-full hover:bg-yellow-50 transition"
+              className="w-full px-4 py-2 border-2 border-yellow-500 text-yellow-700 font-semibold rounded-full hover:bg-yellow-50 transition flex items-center justify-center gap-2"
             >
-              {loading ? 'Création...' : 'Créer un compte'}
+              {loading ? 'Création...' : <><UserPlus size={18} /> Créer un compte</>}
             </button>
           </div>
 

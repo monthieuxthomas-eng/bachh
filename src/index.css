@@ -16,6 +16,20 @@ body {
   color: var(--text-dark);
 }
 
+.auth-party-bg {
+  background-image:
+    linear-gradient(to bottom right, rgba(0, 40, 33, 0.72), rgba(0, 77, 64, 0.52)),
+    url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-party-bg::before,
+.auth-party-bg::after {
+  display: none;
+}
+
 .gradient-gold-green {
   background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-green) 100%);
   position: relative;

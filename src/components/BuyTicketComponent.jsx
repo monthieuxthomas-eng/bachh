@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Loader } from 'lucide-react';
+import { ShoppingCart, Loader, ShieldCheck, Lock, Wallet } from 'lucide-react';
 
 const BuyTicketComponent = ({
   user,
@@ -32,7 +32,9 @@ const BuyTicketComponent = ({
     <div className="min-h-screen gradient-gold-green flex items-center justify-center p-4">
       <div className="card-elegant max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="tropical-wave text-6xl mb-4">🎫</div>
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-50 text-green-800 flex items-center justify-center">
+            <ShieldCheck size={28} />
+          </div>
           <h2 className="text-3xl font-bold text-green-900 mb-2">
             Obtenir mon Pass Baccha
           </h2>
@@ -41,7 +43,7 @@ const BuyTicketComponent = ({
 
         <div className="mb-8 space-y-4">
           <div className="flex items-start gap-3">
-            <div className="text-2xl">✨</div>
+            <ShieldCheck size={22} className="text-green-700 mt-0.5" />
             <div>
               <h3 className="font-semibold text-green-900">Soulbound Token</h3>
               <p className="text-sm text-gray-600">
@@ -51,7 +53,7 @@ const BuyTicketComponent = ({
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="text-2xl">🔐</div>
+            <Lock size={22} className="text-green-700 mt-0.5" />
             <div>
               <h3 className="font-semibold text-green-900">Sécurisé</h3>
               <p className="text-sm text-gray-600">
@@ -61,7 +63,7 @@ const BuyTicketComponent = ({
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="text-2xl">💰</div>
+            <Wallet size={22} className="text-green-700 mt-0.5" />
             <div>
               <h3 className="font-semibold text-green-900">Prix</h3>
               <p className="text-sm text-gray-600">
@@ -80,8 +82,9 @@ const BuyTicketComponent = ({
         <button
           onClick={onConnectWallet}
           disabled={walletLoading}
-          className="w-full mb-4 px-4 py-3 border-2 border-green-600 text-green-700 font-semibold rounded-full hover:bg-green-50 transition"
+          className="w-full mb-4 px-4 py-3 border-2 border-green-600 text-green-700 font-semibold rounded-full hover:bg-green-50 transition flex items-center justify-center gap-2"
         >
+          <Wallet size={18} />
           {walletLoading
             ? 'Connexion wallet...'
             : walletReady
