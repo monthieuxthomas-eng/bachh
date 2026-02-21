@@ -150,12 +150,14 @@ const TicketComponent = ({ user, ticket, walletAddress, onBuyAnotherTicket }) =>
       <div className="max-w-2xl w-full">
         {/* Header Animation */}
         <div className="text-center mb-8">
-          <div className="tropical-wave text-6xl mb-4 inline-block">🎉</div>
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/90 text-green-800 flex items-center justify-center">
+            <CheckCircle size={30} />
+          </div>
           <h1 className="text-4xl font-bold text-white mb-2">
-            Félicitations!
+            Ticket SBT confirmé
           </h1>
           <p className="text-yellow-100 text-lg">
-            Vous possédez votre Soulbound Token Baccha
+            Votre accès festival est actif et vérifiable on-chain
           </p>
         </div>
 
@@ -232,7 +234,7 @@ const TicketComponent = ({ user, ticket, walletAddress, onBuyAnotherTicket }) =>
                 Type de ticket
               </p>
               <p className="text-sm font-semibold text-green-900">
-                🏆 Soulbound Token (SBT) - Non transférable
+                Soulbound Token (SBT) • Non transférable
               </p>
             </div>
           </div>
@@ -240,7 +242,7 @@ const TicketComponent = ({ user, ticket, walletAddress, onBuyAnotherTicket }) =>
           {/* Warning */}
           <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-8">
             <p className="text-sm text-yellow-900 leading-relaxed">
-              <strong>⚠️ Important:</strong> Ce billet est un Soulbound Token lié à votre
+              <strong>Important:</strong> Ce billet est un Soulbound Token lié à votre
               identité et votre portefeuille. Il ne peut pas être transféré, vendu ou donné.
               Seul le propriétaire de ce portefeuille peut l'utiliser.
             </p>
@@ -248,7 +250,7 @@ const TicketComponent = ({ user, ticket, walletAddress, onBuyAnotherTicket }) =>
 
           {/* Festival Info */}
           <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-8">
-            <h3 className="font-bold text-green-900 mb-2">🎪 Baccha Festival 2026</h3>
+            <h3 className="font-bold text-green-900 mb-2">Baccha Festival 2026</h3>
             <p className="text-sm text-gray-700">
               Présentez ce QR code à l'entrée pour accéder au festival. Il pointe vers la preuve on-chain de votre SBT.
             </p>
@@ -283,7 +285,7 @@ const TicketComponent = ({ user, ticket, walletAddress, onBuyAnotherTicket }) =>
         {/* Footer */}
         <div className="text-center text-white">
           <p className="text-sm opacity-90">
-            🎵 Préparez-vous pour une expérience inoubliable au Baccha Festival 2026! 🎉
+            Merci. Conservez ce ticket et présentez-le à l'entrée.
           </p>
         </div>
       </div>
