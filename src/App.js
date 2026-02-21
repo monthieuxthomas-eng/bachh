@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { auth, db, firebaseInitError } from './firebase';
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { arrayUnion, doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { ShieldCheck, LogIn, UserPlus } from 'lucide-react';
+import { ShieldCheck, LogIn, UserPlus, LogOut, Settings } from 'lucide-react';
 import BuyTicketComponent from './components/BuyTicketComponent';
 import WaitingComponent from './components/WaitingComponent';
 import TicketComponent from './components/TicketComponent';
@@ -863,15 +863,17 @@ function App() {
         />
         <button
           onClick={handleLogout}
-          className="fixed bottom-4 left-4 px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+          className="fixed bottom-4 left-4 px-4 py-2 bg-white/95 text-gray-800 rounded-full border border-gray-200 shadow-lg hover:bg-white transition flex items-center gap-2"
         >
+          <LogOut size={16} />
           Déconnexion
         </button>
         {isAdminUser && (
           <button
             onClick={handleOpenAdminPanel}
-            className="fixed bottom-4 right-4 px-4 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition"
+            className="fixed bottom-4 right-4 px-4 py-2 bg-green-900 text-white rounded-full border border-green-800 shadow-lg hover:bg-green-800 transition flex items-center gap-2"
           >
+            <Settings size={16} />
             Panel admin
           </button>
         )}
@@ -890,15 +892,17 @@ function App() {
         <WaitingComponent userName={userInfo?.email} />
         <button
           onClick={handleLogout}
-          className="fixed bottom-4 left-4 px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+          className="fixed bottom-4 left-4 px-4 py-2 bg-white/95 text-gray-800 rounded-full border border-gray-200 shadow-lg hover:bg-white transition flex items-center gap-2"
         >
+          <LogOut size={16} />
           Déconnexion
         </button>
         {isAdminUser && (
           <button
             onClick={handleOpenAdminPanel}
-            className="fixed bottom-4 right-4 px-4 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition"
+            className="fixed bottom-4 right-4 px-4 py-2 bg-green-900 text-white rounded-full border border-green-800 shadow-lg hover:bg-green-800 transition flex items-center gap-2"
           >
+            <Settings size={16} />
             Panel admin
           </button>
         )}
@@ -922,15 +926,17 @@ function App() {
         />
         <button
           onClick={handleLogout}
-          className="fixed bottom-4 left-4 px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+          className="fixed bottom-4 left-4 px-4 py-2 bg-white/95 text-gray-800 rounded-full border border-gray-200 shadow-lg hover:bg-white transition flex items-center gap-2"
         >
+          <LogOut size={16} />
           Déconnexion
         </button>
         {isAdminUser && (
           <button
             onClick={handleOpenAdminPanel}
-            className="fixed bottom-4 right-4 px-4 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition"
+            className="fixed bottom-4 right-4 px-4 py-2 bg-green-900 text-white rounded-full border border-green-800 shadow-lg hover:bg-green-800 transition flex items-center gap-2"
           >
+            <Settings size={16} />
             Panel admin
           </button>
         )}
